@@ -1,0 +1,87 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+    <!-- jquery and jqueryui -->
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="rl.js"></script>
+    <!-- bootstrap -->
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link href="bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Game</div>
+                    <div class="panel-body">
+                        <div id="viz"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Parameters</div>
+                    <div class="panel-body">
+                        greedy epsilon: <span id="eps"></span>
+                        <div id="master"></div>
+                        discount factor gamma: <span id="gamma"></span>
+                        <div id="masterGamma"></div>
+                        learning rate alpha: <span id="alpha"></span>
+                        <div id="masterAlpha"></div>
+                        experience interval: <span id="experienceAdd"></span>
+                        <div id="masterExperienceAdd"></div>
+                        experience size: <span id="experienceSize"></span>
+                        <div id="masterExperienceSize"></div>
+                        learning steps: <span id="learningSteps"></span>
+                        <div id="masterLearningSteps"></div>
+                        tderror clamp: <span id="errorClamp"></span>
+                        <div id="masterErrorClamp"></div>
+                        game speed: <span id="gameSpeed"></span>
+                        <div id="masterGameSpeed"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Statistics</div>
+                    <div class="panel-body">
+                        <div id="stats"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="network">
+                            <button class="btn btn-success" onclick="startGame()">Start</button>
+                            <button class="btn btn-danger" onclick="stopGame()">Stop</button>
+                            <button class="btn btn-primary" onclick="resetGame()">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="col-sm-12">
+                         <h1 class="display-3">What ?</h1>
+                         <p>Its tic-tac-toe ! Kind of boring...but add some machine learning and things start to get interesting. You are seeing two players the red one is making his choice
+                            by random. The blue one makes his choice based on machine learning when you want to be more specific its reinforcement-learning or q-learning. Just hit the <strong>start</strong> button and you can see the AI player improve over time. With the default settings it takes about 100000 games for the AI player to become quite good. Watch
+                            the machine rising :)</p>
+            </div>
+            <div class="col-sm-12">
+                         <h1 class="display-3">How ?</h1>
+                         <p>To be honest there is no real reason for using javscript in machine learning but its fun to play with. The library i used is called <a href="http://http://cs.stanford.edu/people/karpathy/reinforcejs/">reinforcejs</a> by Andrey Karpathy. Have a look at his 
+                         <a href="http://cs.stanford.edu/people/karpathy/reinforcejs/puckworld.html">puckworld demo</a> for a nice introduction of Deep Q Learning and he will tell you someting about all the parameters you can use to modify while the machine learns to play.
+                         </p>
+            </div>
+        </div>
+        <script type="text/javascript">
+        function initSlider(){$("#eps").html(spec.epsilon),$("#gamma").html(spec.gamma),$("#alpha").html(spec.alpha),$("#experienceAdd").html(spec.experience_add_every),$("#experienceSize").html(spec.experience_size),$("#learningSteps").html(spec.learning_steps_per_iteration),$("#errorClamp").html(spec.tderror_clamp),$("#gameSpeed").html(gameSpeed),$("#master").slider({min:0,max:1,animate:!0,value:spec.epsilon,step:.01,slide:function(e,l){spec.epsilon=l.value,$("#eps").html(l.value.toFixed(2))}}),$("#masterGamma").slider({min:0,max:1,animate:!0,value:spec.gamma,step:.1,slide:function(e,l){spec.gamma=l.value,$("#gamma").html(l.value.toFixed(1))}}),$("#masterAlpha").slider({min:0,max:1,animate:!0,value:spec.alpha,step:.005,slide:function(e,l){spec.alpha=l.value,$("#alpha").html(l.value.toFixed(3))}}),$("#masterExperienceAdd").slider({min:1,max:100,animate:!0,value:spec.experience_add_every,step:1,slide:function(e,l){spec.experience_add_every=l.value,$("#experienceAdd").html(l.value.toFixed(3))}}),$("#masterExperienceSize").slider({min:1,max:1e6,animate:!0,value:spec.experience_size,step:10,slide:function(e,l){spec.experience_size=l.value,$("#experienceSize").html(l.value.toFixed(0))}}),$("#masterLearningSteps").slider({min:1,max:100,animate:!0,value:spec.learning_steps_per_iteration,step:1,slide:function(e,l){spec.learning_steps_per_iteration=l.value,$("#learningSteps").html(l.value.toFixed(0))}}),$("#masterErrorClamp").slider({min:0,max:1,animate:!0,value:spec.tderror_clamp,step:.1,slide:function(e,l){spec.tderror_clamp=l.value,$("#errorClamp").html(l.value.toFixed(1))}}),$("#masterGameSpeed").slider({min:0,max:5e3,animate:!0,value:gameSpeed,step:1,slide:function(e,l){gameSpeed=l.value,timer_1.set_interval(gameSpeed),$("#gameSpeed").html(l.value.toFixed(0))}})}function stepAI(){var e=agent.act(field);0==e&&(1!=field[0]&&10!=field[0]?(field[0]=10,fieldOne.style("fill","dodgerblue"),agent.learn(getReward(0))):e=1),1==e&&(1!=field[1]&&10!=field[1]?(field[1]=10,fieldTwo.style("fill","dodgerblue"),agent.learn(getReward(1))):e=2),2==e&&(1!=field[2]&&10!=field[2]?(field[2]=10,fieldThree.style("fill","dodgerblue"),agent.learn(getReward(2))):e=3),3==e&&(1!=field[3]&&10!=field[3]?(field[1][0]=10,fieldFour.style("fill","dodgerblue"),agent.learn(getReward(3))):e=4),4==e&&(1!=field[4]&&10!=field[4]?(field[4]=10,fieldFive.style("fill","dodgerblue"),agent.learn(getReward(4))):e=5),5==e&&(1!=field[5]&&10!=field[6]?(field[5]=10,fieldSix.style("fill","dodgerblue"),agent.learn(getReward(5))):e=6),6==e&&(1!=field[6]&&10!=field[6]?(field[6]=10,fieldSeven.style("fill","dodgerblue"),agent.learn(getReward(6))):e=7),7==e&&(1!=field[7]&&10!=field[7]?(field[7]=10,fieldEight.style("fill","dodgerblue"),agent.learn(getReward(7))):e=8),8==e&&(1!=field[8]&&10!=field[8]?(field[8]=10,fieldNine.style("fill","dodgerblue"),agent.learn(getReward(8))):e=9)}function stepIvan(){var e=Math.floor(9*Math.random())+1;1==e&&(1!=field[0]&&10!=field[0]?(field[0]=1,fieldOne.style("fill","red")):stepIvan()),2==e&&(1!=field[1]&&10!=field[1]?(field[1]=1,fieldTwo.style("fill","red")):stepIvan()),3==e&&(1!=field[2]&&10!=field[2]?(field[2]=1,fieldThree.style("fill","red")):stepIvan()),4==e&&(1!=field[3]&&10!=field[3]?(field[3]=1,fieldFour.style("fill","red")):stepIvan()),5==e&&(1!=field[4]&&10!=field[4]?(field[4]=1,fieldFive.style("fill","red")):stepIvan()),6==e&&(1!=field[5]&&10!=field[5]?(field[5]=1,fieldSix.style("fill","red")):stepIvan()),7==e&&(1!=field[6]&&10!=field[6]?(field[6]=1,fieldSeven.style("fill","red")):stepIvan()),8==e&&(1!=field[7]&&10!=field[7]?(field[7]=1,fieldEight.style("fill","red")):stepIvan()),9==e&&(1!=field[8]&&10!=field[8]?(field[8]=1,fieldNine.style("fill","red")):stepIvan())}function calculateReward(e,l,t,i){var a=0;return(10===l||10===e||10===t||10===i)&&(a=.2),(20===l||20===e||20===t||20===i)&&(a=.8),(30===l||30===e||30===t||30===i)&&(a=1),(22===l||22===e||22===t||22===i)&&(a=.5),(21===l||21===e||21===t||21===i)&&(a=.3),(11===l||11===e||11===t||11===i)&&(a=.1),a}function getReward(e){var l=0,t=0,i=0,a=0,d=0;return 0===e?(i=field[0]+field[1]+field[2],t=field[0]+field[3]+field[6],a=field[0]+field[4]+field[8],l=calculateReward(t,i,a,d)):1===e?(i=field[0]+field[1]+field[2],t=field[1]+field[4]+field[8],l=calculateReward(t,i,a,d)):2===e?(i=field[0]+field[1]+field[2],t=field[2]+field[5]+field[8],a=field[2]+field[4]+field[6],l=calculateReward(t,i,a,d)):3===e?(i=field[3]+field[4]+field[5],t=field[0]+field[3]+field[6],l=calculateReward(t,i,a,d)):4===e?(i=field[3]+field[4]+field[5],t=field[1]+field[4]+field[7],a=field[0]+field[4]+field[8],d=field[6]+field[4]+field[2],l=calculateReward(t,i,a,d)):5===e?(i=field[3]+field[4]+field[5],t=field[2]+field[5]+field[8],l=calculateReward(t,i,a,d)):6===e?(i=field[6]+field[7]+field[8],t=field[0]+field[3]+field[6],a=field[6]+field[4]+field[2],l=calculateReward(t,i,a,d)):7===e?(i=field[6]+field[7]+field[8],t=field[1]+field[4]+field[7],l=calculateReward(t,i,a,d)):8===e?(i=field[6]+field[7]+field[8],t=field[2]+field[5]+field[8],a=field[0]+field[4]+field[8],l=calculateReward(t,i,a,d)):void 0}function isGameOver(){var e=new Array,l=!1;e.push(field[0]+field[1]+field[2]),e.push(field[3]+field[4]+field[5]),e.push(field[6]+field[7]+field[8]),e.push(field[0]+field[3]+field[6]),e.push(field[1]+field[4]+field[7]),e.push(field[2]+field[5]+field[8]),e.push(field[0]+field[4]+field[8]),e.push(field[6]+field[4]+field[2]);for(var t=0;t<=e.length;t++){if(30===e[t])return field=[0,0,0,0,0,0,0,0,0],agent.learn(1),gamesTotal+=1,winsAI+=1,displayGamesTotal.text("PLAYED GAMES: "+gamesTotal),displayWinsAI.text("WINS AI: "+winsAI+"  PERCENT: "+(winsAI/gamesTotal*100).toFixed(2)),resetField(),l=!0,!0;if(3===e[t])return field=[0,0,0,0,0,0,0,0,0],gamesTotal+=1,winsIvan+=1,displayGamesTotal.text("PLAYED GAMES: "+gamesTotal),displayWinsIvan.text("WINS RANDOM: "+winsIvan+"  PERCENT: "+(winsIvan/gamesTotal*100).toFixed(2)),agent.learn(0),resetField(),l=!0,!0}for(m=0;m<field.length;m++){if(!(field[m]>0))return l=!1;l=!0}return l&&(console.log("Draw restarting the game"),resetField(),gamesTotal+=1,drawGame+=1,displayGamesTotal.text("PLAYED GAMES: "+gamesTotal),displayGamesDraw.text("GAMES  DRAW: "+drawGame+" PERCENT: "+(drawGame/gamesTotal*100).toFixed(2)),field=[0,0,0,0,0,0,0,0,0]),l}function resetField(){fieldOne.style("fill","black"),fieldTwo.style("fill","black"),fieldThree.style("fill","black"),fieldFour.style("fill","black"),fieldFive.style("fill","black"),fieldSix.style("fill","black"),fieldSeven.style("fill","black"),fieldEight.style("fill","black"),fieldNine.style("fill","black")}function is_int(e){return parseFloat(e)!=parseInt(e)||isNaN(e)?!1:!0}function stopGame(){timer_1.stop()}function startGame(){timer_1.start(function(){isGameOver(),stepIvan(),isGameOver(),stepAI()},gameSpeed,!0)}function resetGame(){spec={},spec.update="qlearn",spec.gamma=.7,spec.epsilon=.2,spec.alpha=.005,spec.experience_add_every=5,spec.experience_size=1e5,spec.learning_steps_per_iteration=10,spec.tderror_clamp=1,spec.num_hidden_units=100,gameSpeed=5,gamesTotal=0,winsIvan=0,winsAI=0,drawGame=0,agent=new RL.DQNAgent(env,spec),resetField(),initSlider(),displayWinsAI.text("WINS AI:  PERCENT: "),displayGamesTotal.text("PLAYED GAMES: "),displayWinsIvan.text("WINS RANDOM:  PERCENT: "),displayGamesDraw.text("GAMES DRAW:  PERCENT: "),stopGame()}function timer(){var e={running:!1,iv:5e3,timeout:!1,cb:function(){},start:function(e,l,t){var i=this;clearInterval(this.timeout),this.running=!0,e&&(this.cb=e),l&&(this.iv=l),t&&i.execute(i),this.timeout=setTimeout(function(){i.execute(i)},this.iv)},execute:function(e){return e.running?(e.cb(),void e.start()):!1},stop:function(){this.running=!1},pause:function(){this.running=!0},set_interval:function(e){clearInterval(this.timeout),this.start(!1,e)}};return e}var gamesTotal=0,winsIvan=0,winsAI=0,drawGame=0,gameSpeed=5,timer_1=new timer,field=[0,0,0,0,0,0,0,0,0],spec={};spec.update="qlearn",spec.gamma=.7,spec.epsilon=.2,spec.alpha=.005,spec.experience_add_every=5,spec.experience_size=1e5,spec.learning_steps_per_iteration=10,spec.tderror_clamp=1,spec.num_hidden_units=100;var env={};env.getNumStates=function(){return 9},env.getMaxNumActions=function(){return 9};var agent=new RL.DQNAgent(env,spec);initSlider();var statsSVG=d3.select("#stats").append("svg").attr("viewBox","0 0 280 280").style("background-color","black"),displayGamesTotal=statsSVG.append("text").attr("x",10).attr("y",25).style("fill","white").style("font-size","20px").attr("dy",".70em").text(""),displayWinsIvan=statsSVG.append("text").attr("x",10).attr("y",75).style("fill","white").style("font-size","13px").attr("dy",".30em").text(""),displayWinsAI=statsSVG.append("text").attr("x",10).attr("y",100).style("fill","white").style("font-size","13px").attr("dy",".30em").text(""),displayGamesDraw=statsSVG.append("text").attr("x",10).attr("y",125).style("fill","white").style("font-size","13px").attr("dy",".30em").text("");displayWinsAI.text("WINS AI:  PERCENT: "),displayGamesTotal.text("PLAYED GAMES: "),displayWinsIvan.text("WINS RANDOM:  PERCENT: "),displayGamesDraw.text("GAMES DRAW:  PERCENT: ");var sampleSVG=d3.select("#viz").append("svg").attr("viewBox","0 0 280 280").style("background-color","black"),fieldOne=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",50).attr("cy",50),fieldTwo=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",140).attr("cy",50),fieldThree=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",230).attr("cy",50),fieldFour=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",50).attr("cy",140),fieldFive=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",140).attr("cy",140),fieldSix=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",230).attr("cy",140),fieldSeven=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",50).attr("cy",230),fieldEight=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",140).attr("cy",230),fieldNine=sampleSVG.append("circle").style("stroke","white").style("stroke-width",5).style("fill","black").attr("r",40).attr("cx",230).attr("cy",230);  
+        </script>
+</body>
+
+</html>
